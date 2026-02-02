@@ -1,7 +1,23 @@
 let isOpen = false;
+let sidePanelPort = null;
 
+// Listen for side panel connection
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name === 'sidepanel') {
+    console.log('[Background] Side panel connected');
+    sidePanelPort = port;
+
+    port.onDisconnect.addListener(() => {
+      console.log('[Background] Side panel disconnected');
+      sidePanelPort = null;
+    });
+  }
+});
+
+// Handle toggle-sidepanel action from popup
 chrome.runtime.onMessage.addListener((message) => {
   if (message.action === "toggle-sidepanel") {
+    console.log('[Background] Toggle sidepanel requested');
     chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
       if (!tab?.id) return;
 
@@ -13,8 +29,10 @@ chrome.runtime.onMessage.addListener((message) => {
         });
 
         chrome.sidePanel.open({ tabId: tab.id });
+        console.log('[Background] Side panel opened');
       } else {
         chrome.sidePanel.close({ tabId: tab.id });
+        console.log('[Background] Side panel closed');
       }
 
       isOpen = !isOpen;
@@ -32,6 +50,63 @@ chrome.runtime.onMessage.addListener((message, sender) => {
         files: ['content.js']
       });
     });
+  }
+});
+
+const GEMINI_KEY = env.GEMINI_KEY;
+
+async function callGemini(prompt) {
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_KEY}`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [{ text: prompt }]
+          }
+        ]
+      })
+    }
+  );
+
+  const data = await res.json();
+
+  const answer = data.candidates?.[0]?.content?.parts?.[0]?.text;
+  return answer;
+
+}
+
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.action === 'ASK_GEMINI') {
+    const prompt = `Summarize these reviews:\n${msg.reviewArr}`;
+
+    callGemini(prompt)
+      .then(answer => {
+        console.log('[Gemini] Got answer, sending to side panel');
+        sendResponse({ success: true, answer });
+
+        // Send to side panel via port
+        if (sidePanelPort) {
+          console.log('[Background] Sending DISPLAY_SUMMARY to panel');
+          sidePanelPort.postMessage({
+            action: 'DISPLAY_SUMMARY',
+            answer: answer
+          });
+        } else {
+          console.error('[Background] Side panel port not connected');
+        }
+      })
+      .catch(err => {
+        console.error('[Gemini] API Error:', err);
+        sendResponse({ success: false, error: err.message });
+      });
+
+    return true;
   }
 });
 

@@ -1,14 +1,15 @@
-const reviews = document.querySelectorAll('[data-hook="review"]');
-console.log('Reviews found:', reviews.length);
+const reviewElements = document.querySelectorAll('[data-hook="review"]');
+let n = reviewElements.length;
+console.log('Reviews found:', n);
 
 const reviewArr = [];
 
-for(let i=0;i<reviews.length;i++){
-    reviewArr[i] = reviews[i].innerText;
+for (let i = 0; i < reviewElements.length; i++) {
+    reviewArr[i] = reviewElements[i].innerText;
     console.log(reviewArr[i]);
 }
 
 chrome.runtime.sendMessage({
-  action: 'REVIEWS_FOUND',
-  count: reviews.length
-});
+    action: 'ASK_GEMINI',
+    reviewArr
+})
