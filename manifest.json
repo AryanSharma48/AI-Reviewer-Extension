@@ -11,7 +11,8 @@
     },
     "permissions":[
         "activeTab",
-        "sidePanel"
+        "sidePanel",
+        "scripting"
     ]
     
 }

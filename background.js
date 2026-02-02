@@ -21,3 +21,17 @@ chrome.runtime.onMessage.addListener((message) => {
     });
   }
 });
+
+chrome.runtime.onMessage.addListener((message, sender) => {
+  if (message.action === 'get-reviews') {
+    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+      if (!tab?.id) return;
+
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ['content.js']
+      });
+    });
+  }
+});
+
