@@ -1,4 +1,4 @@
-# Amazon AI Assistant 
+# SWAN AI Assistant 
 > Built by **Aryan Sharma**
 
 A Chrome extension made to reduce the hectic task of going through hundreds of reviews manually by generating concise summaries inside a **Chrome side panel**.
