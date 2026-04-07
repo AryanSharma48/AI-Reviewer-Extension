@@ -34,7 +34,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 
   if (message.action === 'ASK_GEMINI') {
-    handleGeminiRequest(message.reviewArr, sendResponse);
+    handleAPIRequest(message.reviewArr, sendResponse);
     return true; // Keep channel open for async response
   }
 
@@ -51,7 +51,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
 });
 
-async function handleGeminiRequest(reviewArr, sendResponse) {
+async function handleAPIRequest(reviewArr, sendResponse) {
   if (!reviewArr || reviewArr.length === 0) {
       if (sidePanelPort) sidePanelPort.postMessage({ action: 'DISPLAY_SUMMARY', answer: "No reviews found to summarize." });
       return;
@@ -59,7 +59,7 @@ async function handleGeminiRequest(reviewArr, sendResponse) {
 
   try {
     // Calling Express backend
-    const res = await fetch('http://localhost:8080/api/summarize', {
+    const res = await fetch('https://swan-ai-assistant.onrender.com', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ reviewArr: reviewArr })
