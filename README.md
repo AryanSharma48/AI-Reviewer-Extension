@@ -1,4 +1,4 @@
-# Amazon AI Assistant 
+# SWAN AI Assistant 
 > Built by **Aryan Sharma**
 
 A Chrome extension made to reduce the hectic task of going through hundreds of reviews manually by generating concise summaries inside a **Chrome side panel**.
@@ -52,7 +52,7 @@ GEMINI_KEY=your_api_key_here
 ## Installation (Development)
 Clone the repository
 
-- git clone https://github.com/AryanSharma48/amazon-ai-assistant.git
+- git clone https://github.com/AryanSharma48/swan-ai-assistant.git
 
 - Open Chrome and navigate to:
 
